@@ -1,0 +1,43 @@
+name: Google Voice Keep Alive & Auto Log
+
+on:
+  schedule:
+    # 每月 1 号的 UTC 时间 00:00 运行 (北京时间上午 8:00)
+    - cron: '0 0 1 * *'
+  workflow_dispatch: # 允许手动点按钮测试
+
+permissions:
+  contents: write
+
+jobs:
+  keep-alive-job:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Run Python Script (Send SMS)
+        env:
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_PASSWORD: ${{ secrets.GMAIL_PASSWORD }}
+          GV_GATEWAY: ${{ secrets.GV_GATEWAY }}
+        run: python main.py
+
+      - name: Update Log File
+        run: |
+          # 将当前时间追加写入日志文件
+          echo "Run at $(date)" >> keepalive.log
+
+      - name: Commit and Push Changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action Bot"
+          git add keepalive.log
+          git commit -m "Auto-update keepalive log [skip ci]" || echo "No changes to commit"
+          git push
