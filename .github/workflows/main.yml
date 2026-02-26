@@ -2,9 +2,9 @@ name: Google Voice Keep Alive & Auto Log
 
 on:
   schedule:
-    # 每月 1 号的 UTC 时间 00:00 运行 (北京时间上午 8:00)
+    # Runs at 00:00 UTC on the 1st of every month (08:00 Beijing Time)
     - cron: '0 0 1 * *'
-  workflow_dispatch: # 允许手动点按钮测试
+  workflow_dispatch: # Allows manual triggering for testing
 
 permissions:
   contents: write
@@ -16,6 +16,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetches full history to allow branch switching
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -29,15 +31,20 @@ jobs:
           GV_GATEWAY: ${{ secrets.GV_GATEWAY }}
         run: python main.py
 
-      - name: Update Log File
+      - name: Update Log and Push to Separate Branch
         run: |
-          # 将当前时间追加写入日志文件
-          echo "Run at $(date)" >> keepalive.log
-
-      - name: Commit and Push Changes
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action Bot"
+          # 1. Configure Git Identity
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          
+          # 2. Create or switch to the 'logs' branch
+          # This ensures that log updates don't clutter the main branch for forkers
+          git checkout logs 2>/dev/null || git checkout -b logs
+          
+          # 3. Update the log file
+          echo "Run at $(date -u) UTC" >> keepalive.log
+          
+          # 4. Commit and Push to the 'logs' branch specifically
           git add keepalive.log
-          git commit -m "Auto-update keepalive log [skip ci]" || echo "No changes to commit"
-          git push
+          git commit -m "chore: update keepalive log [skip ci]" || echo "No changes to commit"
+          git push origin logs

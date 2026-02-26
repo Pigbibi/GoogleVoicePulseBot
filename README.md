@@ -19,6 +19,36 @@
 1. **Activity Logic**: The Python script sends an email through your Gmail account addressed to a specific Google Voice SMS gateway address (`@txt.voice.google.com`). This is processed by Google as an outgoing SMS from your GV number.
 2. **Workflow Retention**: GitHub Actions normally disables scheduled workflows if the repository has no activity for 60 days. This bot bypasses that by updating a log file automatically during every run.
 
+## 🚀 Quick Start: Fork & Activate
+
+Follow these steps to set up your own automated pulse in under 5 minutes:
+
+### 1. Fork this Repository
+Click the **Fork** button at the top-right of this page to create a copy of this project in your own GitHub account.
+
+### 2. Enable GitHub Actions
+By default, GitHub disables Actions on forked repositories. 
+- Navigate to the **Actions** tab in your forked repo.
+- Click the green button: **"I understand my workflows, go ahead and enable them"**.
+
+### 3. Add Your Secrets
+Go to `Settings > Secrets and variables > Actions` and click **New repository secret** to add the three required variables:
+* `GMAIL_USER`: Your Gmail address.
+* `GMAIL_PASSWORD`: Your 16-character App Password.
+* `GV_GATEWAY`: The `@txt.voice.google.com` recipient address.
+
+### 4. Grant Write Permissions
+To allow the bot to update `keepalive.log`, you must give the workflow write access:
+- Go to `Settings > Actions > General`.
+- Scroll down to **Workflow permissions**.
+- Select **Read and write permissions** and click **Save**.
+
+### 5. Manual Test (Optional)
+To verify everything works immediately:
+- Go to the **Actions** tab.
+- Select the **GV-Pulse** workflow on the left.
+- Click the **Run workflow** dropdown and trigger it manually.
+
 ## 🛠️ Setup Instructions
 
 ### 1. Prerequisites
@@ -36,7 +66,7 @@ Go to your repository `Settings > Secrets and variables > Actions` and add the f
 
 ### 3. Workflow Schedule
 - **Default Frequency**: Runs at **00:00 UTC on the 1st of every month**.
-- To change the timing, modify the `cron` expression in `.github/workflows/keepalive.yml`.
+- To change the timing, modify the `cron` expression in `.github/workflows/main.yml`.
 
 ## 📝 Execution Logs
 Check the [keepalive.log](./keepalive.log) file for a history of successful operations.

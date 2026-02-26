@@ -10,7 +10,7 @@ def send_mail():
     receiver = os.environ.get('GV_GATEWAY')
 
     if not all([username, password, receiver]):
-        print("Error: Secrets 缺失，请检查配置。")
+        print("Error: Missing secrets. Please check your configuration.")
         return
 
     msgs = [
@@ -30,9 +30,9 @@ def send_mail():
         with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
             server.login(username, password)
             server.sendmail(username, [receiver], msg.as_string())
-        print(f"[{datetime.now()}] 成功发送至: {receiver}")
+        print(f"[{datetime.now()}] Successfully sent to: {receiver}")
     except Exception as e:
-        print(f"发送失败: {e}")
+        print(f"Failed to send email: {e}")
 
 if __name__ == "__main__":
     send_mail()
