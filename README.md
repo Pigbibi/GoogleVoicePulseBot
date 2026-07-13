@@ -5,6 +5,15 @@
 ![Python](https://img.shields.io/badge/Python-3.12-blue)
 ![GitHub Actions](https://img.shields.io/badge/Automation-GitHub--Actions-blueviolet)
 
+
+## 中文概览
+
+这是一个 Google Voice 保活机器人：通过 Gmail SMTP 发送定期短信，避免号码因长期不活跃而失效。
+
+## English Overview
+
+This is a Google Voice keep-alive bot that sends periodic SMS via Gmail SMTP to keep a GV number active.
+
 **GV-Pulse** is an automated utility designed to prevent Google Voice numbers from expiring due to inactivity. It uses the Gmail SMTP service to send periodic text messages via the official Google Voice SMS gateway, simulating active usage with zero maintenance.
 
 ## ✨ Features
