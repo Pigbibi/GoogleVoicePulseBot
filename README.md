@@ -1,81 +1,96 @@
-# 📡 GV-Pulse: Google Voice Keep-Alive Bot
+# GoogleVoicePulseBot
 
-![Status](https://img.shields.io/badge/Status-Active-brightgreen)
-![License](https://img.shields.io/badge/License-MIT-blue)
-![Python](https://img.shields.io/badge/Python-3.12-blue)
-![GitHub Actions](https://img.shields.io/badge/Automation-GitHub--Actions-blueviolet)
+[简体中文](README_CN.md)
 
+[![Workflow](https://github.com/Pigbibi/GoogleVoicePulseBot/actions/workflows/main.yml/badge.svg)](https://github.com/Pigbibi/GoogleVoicePulseBot/actions/workflows/main.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-This is a Google Voice keep-alive bot that sends periodic SMS via Gmail SMTP to keep a GV number active.
+Send a periodic message to a configured Google Voice SMS gateway address
+through Gmail SMTP. The included GitHub Actions workflow runs monthly and can
+also be triggered manually.
 
-**GV-Pulse** is an automated utility designed to prevent Google Voice numbers from expiring due to inactivity. It uses the Gmail SMTP service to send periodic text messages via the official Google Voice SMS gateway, simulating active usage with zero maintenance.
+## Important limitation
 
-## ✨ Features
+This project can only submit an email to the configured gateway. It cannot
+guarantee that Google Voice accepts or delivers the message, or that a number
+remains active. Gateway behavior, account state, and Google Voice policy may
+change. Check the workflow output and the actual number regularly, and follow
+Google's applicable terms.
 
-- **Automated Pulse**: Sends a monthly SMS to maintain your number's active status.
-- **Repository Keep-Alive**: Automatically commits to `keepalive.log` after each run to prevent GitHub from disabling the workflow due to repository inactivity.
-- **Ultra-Lightweight**: No heavy dependencies; runs entirely on GitHub's free-tier runners.
-- **Private & Secure**: Uses GitHub Secrets to protect your sensitive credentials.
+## How it works
 
-## 🏗️ How It Works
+```text
+GitHub Actions schedule
+        │
+        ▼
+Python signs in to Gmail SMTP
+        │
+        ▼
+message sent to the configured @txt.voice.google.com address
+```
 
-1. **Activity Logic**: The Python script sends an email through your Gmail account addressed to a specific Google Voice SMS gateway address (`@txt.voice.google.com`). This is processed by Google as an outgoing SMS from your GV number.
-2. **Workflow Retention**: GitHub Actions normally disables scheduled workflows if the repository has no activity for 60 days. This bot bypasses that by updating a log file automatically during every run.
+The workflow runs at `00:00 UTC` on the first day of each month. It also appends
+a `keepalive.log` entry on the `logs` branch to provide a separate run record.
 
-## 🚀 Quick Start: Fork & Activate
+The log entry is not a delivery receipt. Use the Python step output and the
+actual account state to determine whether the operation worked.
 
-Follow these steps to set up your own automated pulse in under 5 minutes:
+## Configuration
 
-### 1. Fork this Repository
-Click the **Fork** button at the top-right of this page to create a copy of this project in your own GitHub account.
+Add these GitHub Actions secrets:
 
-### 2. Enable GitHub Actions
-By default, GitHub disables Actions on forked repositories. 
-- Navigate to the **Actions** tab in your forked repo.
-- Click the green button: **"I understand my workflows, go ahead and enable them"**.
+| Secret | Purpose |
+| --- | --- |
+| `GMAIL_USER` | Full Gmail address used to send the message |
+| `GMAIL_PASSWORD` | Gmail App Password, not the normal account password |
+| `GV_GATEWAY` | Destination address ending in `@txt.voice.google.com` |
 
-### 3. Add Your Secrets
-Go to `Settings > Secrets and variables > Actions` and click **New repository secret** to add the three required variables:
-* `GMAIL_USER`: Your Gmail address.
-* `GMAIL_PASSWORD`: Your 16-character App Password.
-* `GV_GATEWAY`: The `@txt.voice.google.com` recipient address.
+Enable two-step verification on the Gmail account and create a dedicated App
+Password for this workflow.
 
-### 4. Grant Write Permissions
-To allow the bot to update `keepalive.log`, you must give the workflow write access:
-- Go to `Settings > Actions > General`.
-- Scroll down to **Workflow permissions**.
-- Select **Read and write permissions** and click **Save**.
+## Deploy
 
-### 5. Manual Test (Optional)
-To verify everything works immediately:
-- Go to the **Actions** tab.
-- Select the **GV-Pulse** workflow on the left.
-- Click the **Run workflow** dropdown and trigger it manually.
+1. Create a private repository from a reviewed copy of this source.
+2. Enable workflows in that private deployment repository.
+3. Add the three secrets under **Settings → Secrets and variables → Actions**.
+4. Confirm the workflow's `GITHUB_TOKEN` may write repository contents so it can
+   update the `logs` branch.
+5. Run **Google Voice Keep Alive & Auto Log** manually once.
+6. Inspect the Python step and confirm the result from the account side.
 
-## 🛠️ Setup Instructions
+Edit the cron expression in `.github/workflows/main.yml` to change the schedule.
+GitHub Actions cron uses UTC and scheduled runs may start later than the exact
+configured time.
 
-### 1. Prerequisites
-- **Gmail App Password**: Generate a 16-character **App Password** from your Google Account security settings (Standard login passwords will not work).
-- **Target Gateway Address**: Send a text message from any mobile number to your Google Voice number. Reply to that message via Gmail and look for the recipient address ending in `@txt.voice.google.com`.
+## Run locally
 
-### 2. Configure GitHub Secrets
-Go to your repository `Settings > Secrets and variables > Actions` and add the following:
+The script uses only the Python standard library:
 
-| Secret Name | Description |
-| :--- | :--- |
-| `GMAIL_USER` | Your full Gmail address |
-| `GMAIL_PASSWORD` | The 16-character Gmail App Password |
-| `GV_GATEWAY` | The target `@txt.voice.google.com` address |
+```bash
+GMAIL_USER='name@gmail.com' \
+GMAIL_PASSWORD='app-password' \
+GV_GATEWAY='recipient@txt.voice.google.com' \
+python main.py
+```
 
-### 3. Workflow Schedule
-- **Default Frequency**: Runs at **00:00 UTC on the 1st of every month**.
-- To change the timing, modify the `cron` expression in `.github/workflows/main.yml`.
+This command sends a real message. Do not run it with unverified settings.
 
-## 📝 Execution Logs
-Check the [keepalive.log](./keepalive.log) file for a history of successful operations.
+## Security
 
-## 📜 Disclaimer
-This project is for personal use only. Use it responsibly and in accordance with Google's Terms of Service.
+- Never commit Gmail credentials, App Passwords, or gateway addresses.
+- Do not paste secrets into issues, screenshots, or workflow logs.
+- Review a fork's workflow before providing credentials to it.
+- Revoke and replace the App Password immediately after suspected exposure.
+- Remember that Actions logs in a public repository are public.
 
-## ⚖️ License
-Distributed under the MIT License.
+Follow [SECURITY.md](SECURITY.md) for vulnerability reports.
+
+## Contributing and support
+
+Read [CONTRIBUTING.md](CONTRIBUTING.md) before submitting a change. See
+[SUPPORT.md](SUPPORT.md) for usage questions and bug reports. Participation is
+governed by [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
+
+## License
+
+GoogleVoicePulseBot is available under the [MIT License](LICENSE).

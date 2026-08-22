@@ -1,9 +1,3 @@
-# 📡 GV-Pulse: Google Voice Keep-Alive Bot
+# GoogleVoicePulseBot 简体中文文档
 
-## 中文概览
-
-这是一个 Google Voice 保活机器人：通过 Gmail SMTP 发送定期短信，避免号码因长期不活跃而失效。
-
-## English file
-
-See `README.md` for the main document.
+完整中文文档见 [README_CN.md](README_CN.md)。
