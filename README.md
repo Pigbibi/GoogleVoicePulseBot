@@ -32,6 +32,11 @@ message sent to the configured @txt.voice.google.com address
 The workflow runs at `00:00 UTC` on the first day of each month. It also appends
 a `keepalive.log` entry on the `logs` branch to provide a separate run record.
 
+Runs are serialized and capped at 15 minutes. Missing credentials, SMTP
+timeouts, login failures, and send failures make the workflow fail instead of
+recording a misleading successful run; the SMTP connection itself times out
+after 30 seconds.
+
 The log entry is not a delivery receipt. Use the Python step output and the
 actual account state to determine whether the operation worked.
 

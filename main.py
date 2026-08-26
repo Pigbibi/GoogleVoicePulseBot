@@ -4,14 +4,17 @@ import random
 from email.mime.text import MIMEText
 from datetime import datetime
 
-def send_mail():
+SMTP_TIMEOUT_SECONDS = 30
+
+
+def send_mail() -> int:
     username = os.environ.get('GMAIL_USER')
     password = os.environ.get('GMAIL_PASSWORD')
     receiver = os.environ.get('GV_GATEWAY')
 
     if not all([username, password, receiver]):
         print("Error: Missing secrets. Please check your configuration.")
-        return
+        return 1
 
     msgs = [
         "Update: System is running smoothly.",
@@ -27,12 +30,16 @@ def send_mail():
     msg['To'] = receiver
 
     try:
-        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
+        with smtplib.SMTP_SSL(
+            'smtp.gmail.com', 465, timeout=SMTP_TIMEOUT_SECONDS
+        ) as server:
             server.login(username, password)
             server.sendmail(username, [receiver], msg.as_string())
         print(f"[{datetime.now()}] Successfully sent to: {receiver}")
+        return 0
     except Exception as e:
         print(f"Failed to send email: {e}")
+        return 1
 
 if __name__ == "__main__":
-    send_mail()
+    raise SystemExit(send_mail())
