@@ -29,6 +29,10 @@ Python 脚本登录 Gmail SMTP
 workflow 默认在每月 1 日 `00:00 UTC` 运行。每次运行还会在 `logs` 分支追加一条
 `keepalive.log` 记录，用来保持独立的执行记录。
 
+workflow 会串行执行，单次最长 15 分钟。缺少凭据、SMTP 连接超时、登录失败或发送
+失败都会让 Actions 明确失败，不会继续记录误导性的成功日志；SMTP 连接本身最长等待
+30 秒。
+
 该日志不是短信投递回执。是否发送成功应以 Actions 中 Python 步骤的输出和实际账号
 状态为准。
 
