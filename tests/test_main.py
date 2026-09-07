@@ -1,4 +1,6 @@
 import os
+import contextlib
+import io
 import unittest
 from unittest.mock import MagicMock, patch
 
@@ -6,6 +8,26 @@ import main
 
 
 class SendMailTests(unittest.TestCase):
+    def test_logs_never_include_destination_or_provider_detail(self):
+        values = {
+            "GMAIL_USER": "synthetic-sender@example.invalid",
+            "GMAIL_PASSWORD": "SYNTHETIC_PASSWORD",
+            "GV_GATEWAY": "synthetic-destination@example.invalid",
+        }
+        marker = "SYNTHETIC_PROVIDER_PRIVATE_DETAIL"
+        for failure in (None, RuntimeError(marker)):
+            with self.subTest(failure=bool(failure)):
+                output = io.StringIO()
+                with (
+                    patch.dict(os.environ, values, clear=True),
+                    patch("main.smtplib.SMTP_SSL", side_effect=failure),
+                    contextlib.redirect_stdout(output),
+                    contextlib.redirect_stderr(output),
+                ):
+                    self.assertEqual(main.send_mail(), int(failure is not None))
+                for sensitive in (*values.values(), marker):
+                    self.assertNotIn(sensitive, output.getvalue())
+
     @patch.dict(os.environ, {}, clear=True)
     def test_missing_configuration_fails(self):
         self.assertEqual(main.send_mail(), 1)
