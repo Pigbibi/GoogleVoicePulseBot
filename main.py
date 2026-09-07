@@ -35,10 +35,10 @@ def send_mail() -> int:
         ) as server:
             server.login(username, password)
             server.sendmail(username, [receiver], msg.as_string())
-        print(f"[{datetime.now()}] Successfully sent to: {receiver}")
+        print("SMTP submission accepted; gateway delivery is not confirmed.")
         return 0
-    except Exception as e:
-        print(f"Failed to send email: {e}")
+    except Exception:
+        print("Failed to submit email: SMTP operation failed.")
         return 1
 
 if __name__ == "__main__":
