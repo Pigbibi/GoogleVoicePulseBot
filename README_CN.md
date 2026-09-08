@@ -2,93 +2,51 @@
 
 [English](README.md)
 
-[![Workflow](https://github.com/Pigbibi/GoogleVoicePulseBot/actions/workflows/main.yml/badge.svg)](https://github.com/Pigbibi/GoogleVoicePulseBot/actions/workflows/main.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+通过 Gmail SMTP，定期向指定的 Google Voice 短信网关地址发送邮件。支持手动运行和 GitHub Actions 每月定时运行。
 
-使用 Gmail SMTP 定期向 Google Voice 短信网关地址发送一条消息。项目通过 GitHub
-Actions 每月运行，也支持手动触发。
+脚本只能确认 SMTP 是否接受邮件，不能证明短信送达，也不能保证 Google Voice 号码持续保活。
 
-## 重要说明
+## 快速开始
 
-本项目只能按配置发送邮件，无法保证 Google Voice 会接受、投递该消息，也无法保证
-号码一定保持活跃。网关行为、账号状态和 Google Voice 政策都可能变化。请定期检查
-GitHub Actions 输出和实际号码状态，并遵守 Google 的服务条款。
+1. 为个人部署创建本仓库的私有副本。
+2. 在 **Settings → Secrets and variables → Actions** 添加下列 secrets。
+3. 启用 Actions，运行 **Google Voice Keep Alive & Auto Log**。
+4. 检查发送步骤，并到目标账户确认结果。
 
-## 工作流程
-
-```text
-GitHub Actions 定时任务
-        │
-        ▼
-Python 脚本登录 Gmail SMTP
-        │
-        ▼
-向配置的 @txt.voice.google.com 地址发送消息
-```
-
-workflow 默认在每月 1 日 `00:00 UTC` 运行。每次运行还会在 `logs` 分支追加一条
-`keepalive.log` 记录，用来保持独立的执行记录。
-
-workflow 会串行执行，单次最长 15 分钟。缺少凭据、SMTP 连接超时、登录失败或发送
-失败都会让 Actions 明确失败，不会继续记录误导性的成功日志；SMTP 连接本身最长等待
-30 秒。
-
-该日志不是短信投递回执。是否发送成功应以 Actions 中 Python 步骤的输出和实际账号
-状态为准。
-
-## 配置
-
-需要以下 GitHub Actions secrets：
-
-| Secret | 用途 |
+| Secret | 内容 |
 | --- | --- |
-| `GMAIL_USER` | 用于发送消息的完整 Gmail 地址 |
-| `GMAIL_PASSWORD` | Gmail App Password，不是普通登录密码 |
-| `GV_GATEWAY` | 目标 `@txt.voice.google.com` 地址 |
+| `GMAIL_USER` | 发件 Gmail 地址 |
+| `GMAIL_PASSWORD` | Gmail 应用专用密码 |
+| `GV_GATEWAY` | 以 `@txt.voice.google.com` 结尾的目标地址 |
 
-建议为 Gmail 启用两步验证，并创建只供此 workflow 使用的 App Password。
+为 Gmail 开启两步验证，并使用专门的应用密码。凭据和目标地址不应进入仓库或日志。
 
-## 部署
+## 运行时间与结果
 
-1. 审查源码后，把它复制到一个新的私有仓库。
-2. 在该私有部署仓库中启用 workflow。
-3. 在 **Settings → Secrets and variables → Actions** 添加三个 secrets。
-4. 确认 Actions 的 `GITHUB_TOKEN` 可以写入仓库内容，以便更新 `logs` 分支。
-5. 打开 **Actions → Google Voice Keep Alive & Auto Log**，手动运行一次。
-6. 检查 Python 步骤输出，并确认账号侧实际收到或处理了消息。
+[工作流](.github/workflows/main.yml)默认在每月 1 日 00:00 UTC 运行，可修改 cron 表达式调整时间。定时任务可能延迟启动。
 
-修改 `.github/workflows/main.yml` 中的 cron 可以调整运行时间。GitHub Actions cron
-使用 UTC，且定时任务可能延迟执行。
+运行互斥，最长 15 分钟；SMTP 连接超时为 30 秒。发送错误会使任务失败。工作流会在 `logs` 分支的 `keepalive.log` 中记录运行时间，因此需要 `contents: write` 权限；这份记录不是送达回执。
 
-## 本地运行
+## 本地使用与开发
 
-Python 脚本只使用标准库：
+仅需 Python 标准库。通过可信环境或密钥管理器提供三个配置值，再运行：
 
 ```bash
-GMAIL_USER='name@gmail.com' \
-GMAIL_PASSWORD='app-password' \
-GV_GATEWAY='recipient@txt.voice.google.com' \
 python main.py
 ```
 
-该命令会真实发送消息。不要在不确定配置时运行。
+这会真实发送邮件。仅运行隔离单元测试时使用：
 
-## 安全
+```bash
+python -m unittest discover -s tests
+```
 
-- 不要把 Gmail 密码、App Password 或网关地址提交到仓库。
-- 不要在 issue、截图或 Actions 日志中粘贴 secret。
-- Fork 后检查 workflow 内容，再向它提供凭据。
-- 怀疑凭据泄露时，立即撤销 App Password 并创建新密码。
-- 公共仓库中的 Actions 日志默认对所有人可见。
+SMTP 认证失败时检查账户和应用密码；SMTP 已接受但目标未收到时，应核对网关和目标账户，不要反复重发。
 
-安全问题请按 [SECURITY.md](SECURITY.md) 报告。
+## 支持与贡献
 
-## 贡献与支持
-
-提交改动前请阅读 [CONTRIBUTING.md](CONTRIBUTING.md)。使用问题和 bug 报告渠道见
-[SUPPORT.md](SUPPORT.md)。参与社区时请遵守
-[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)。
+[问题与支持](SUPPORT.md) · [贡献指南](CONTRIBUTING.md) · [安全问题](SECURITY.md) · [行为准则](CODE_OF_CONDUCT.md)
 
 ## 许可证
 
-本项目使用 [MIT License](LICENSE)。
+[MIT](LICENSE)。
