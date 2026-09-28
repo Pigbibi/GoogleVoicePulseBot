@@ -1,6 +1,6 @@
 # GoogleVoicePulseBot
 
-[简体中文](README_CN.md)
+[简体中文](README.zh-CN.md)
 
 Send a periodic email through Gmail SMTP to a configured Google Voice SMS gateway address. Run it manually or with the included monthly GitHub Actions schedule.
 
