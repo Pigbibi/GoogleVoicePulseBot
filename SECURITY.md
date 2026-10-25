@@ -2,17 +2,9 @@
 
 Security fixes target the latest release and `main` branch.
 
-## Reporting
+## Reporting a vulnerability
 
-Do not open a public issue containing Gmail credentials, App Passwords, gateway
-addresses, private workflow logs, or exploit details. Use GitHub's
-[private vulnerability reporting](https://github.com/Pigbibi/GoogleVoicePulseBot/security/advisories/new).
-If that form is unavailable, ask for a private contact through information
-published on the repository owner's GitHub profile without sharing technical
-details publicly.
-
-Include the affected commit, reproduction steps, required attacker access,
-impact, and suggested mitigation in the private report.
+Report security vulnerabilities through [GitHub private vulnerability reporting](https://github.com/Pigbibi/GoogleVoicePulseBot/security/advisories/new). Do not post exploit details, credentials, private sessions or personal data in public issues or PRs. Include the affected version, impact and minimal redacted reproduction. The maintainer handles reports on a best-effort basis; no bounty or response-time guarantee is implied.
 
 ## Relevant issues
 
