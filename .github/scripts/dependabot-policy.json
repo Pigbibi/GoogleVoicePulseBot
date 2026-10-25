@@ -1,0 +1,13 @@
+{
+  "repo": "Pigbibi/GoogleVoicePulseBot",
+  "branch": "main",
+  "files": [],
+  "directories": [
+    "/.github"
+  ],
+  "required_checks": [
+    "test",
+    "Repository hygiene",
+    "Safe dependency update"
+  ]
+}
