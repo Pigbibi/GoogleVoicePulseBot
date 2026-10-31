@@ -39,6 +39,8 @@ python -m unittest discover -s tests
 
 ## 不要做
 
+- 只有所有者或经所有者明确授权的审查者可以添加 `owner-approved` 标签；编码智能体绝不能给自己的 PR 添加该标签。
+
 - 不要把 SMTP 密码、应用专用密码或收件地址写进代码或测试。全部走 secrets。
 - 不要在测试里发起真实 SMTP 连接。测试只验证消息构造。
 
