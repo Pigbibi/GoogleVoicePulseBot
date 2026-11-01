@@ -36,20 +36,30 @@ jobs:
           GV_GATEWAY: ${{ secrets.GV_GATEWAY }}
         run: python main.py
 
-      - name: Update Log and Push to Separate Branch
+      - name: Prepare keepalive log commit
+        id: log_prepare
         run: |
           # 1. Configure Git Identity
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          
+
           # 2. Create or switch to the 'logs' branch
           # This ensures that log updates don't clutter the main branch for forkers
           git checkout logs 2>/dev/null || git checkout -b logs
-          
+
           # 3. Update the log file
           echo "Run at $(date -u) UTC" >> keepalive.log
-          
-          # 4. Commit and Push to the 'logs' branch specifically
+
+          # 4. Commit locally; publication happens after the secret scan
           git add keepalive.log
           git commit -m "chore: update keepalive log [skip ci]" || echo "No changes to commit"
-          git push origin logs
+
+      - name: Scan the keepalive log before publishing
+        id: log_scan
+        uses: QuantStrategyLab/.github/actions/scan-before-publish@0da4da68433b803cda17d3f84e29875a94a32273
+        with:
+          path: keepalive.log
+
+      - name: Push keepalive log to the logs branch
+        if: steps.log_scan.outcome == 'success'
+        run: git push origin logs
