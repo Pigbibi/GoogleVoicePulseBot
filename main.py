@@ -5,7 +5,18 @@ from collections import namedtuple
 from email.mime.text import MIMEText
 from datetime import datetime
 
+SMTP_HOST = 'smtp.gmail.com'
+SMTP_PORT = 465
 SMTP_TIMEOUT_SECONDS = 30
+
+SUBJECT = 'GV Maintenance'
+TIMESTAMP_FORMAT = '%Y-%m-%d %H:%M'
+MESSAGE_LINES = (
+    "Update: System is running smoothly.",
+    "Reminder: Keep active and stay connected.",
+    "Monthly check-in: Hello world!",
+    "Status: All systems go.",
+)
 
 # The deployment supplies these names through repository secrets; a role is
 # added here and nowhere else.
@@ -24,34 +35,38 @@ def load_settings() -> Settings | None:
     return Settings(**values)
 
 
+def compose_message(settings: Settings, line: str) -> MIMEText:
+    content = f"{line} | Time: {datetime.now().strftime(TIMESTAMP_FORMAT)}"
+    message = MIMEText(content)
+    message['Subject'] = SUBJECT
+    message['From'] = settings.username
+    message['To'] = settings.receiver
+    return message
+
+
+def submit(settings: Settings, message: MIMEText) -> None:
+    with smtplib.SMTP_SSL(
+        SMTP_HOST, SMTP_PORT, timeout=SMTP_TIMEOUT_SECONDS
+    ) as server:
+        server.login(settings.username, settings.password)
+        server.sendmail(settings.username, [settings.receiver], message.as_string())
+
+
 def send_mail() -> int:
     settings = load_settings()
     if settings is None:
         print("Error: Missing secrets. Please check your configuration.")
         return 1
 
-    msgs = [
-        "Update: System is running smoothly.",
-        "Reminder: Keep active and stay connected.",
-        "Monthly check-in: Hello world!",
-        "Status: All systems go."
-    ]
-    content = f"{random.choice(msgs)} | Time: {datetime.now().strftime('%Y-%m-%d %H:%M')}"
-
-    msg = MIMEText(content)
-    msg['Subject'] = 'GV Maintenance'
-    msg['From'] = settings.username
-    msg['To'] = settings.receiver
+    message = compose_message(settings, random.choice(MESSAGE_LINES))
 
     try:
-        with smtplib.SMTP_SSL(
-            'smtp.gmail.com', 465, timeout=SMTP_TIMEOUT_SECONDS
-        ) as server:
-            server.login(settings.username, settings.password)
-            server.sendmail(settings.username, [settings.receiver], msg.as_string())
+        submit(settings, message)
         print("SMTP submission accepted; gateway delivery is not confirmed.")
         return 0
     except Exception:
+        # SMTP errors quote the recipient and the server response, and this
+        # output goes to a published CI log; report the failure without them.
         print("Failed to submit email: SMTP operation failed.")
         return 1
 
