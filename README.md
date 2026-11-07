@@ -25,7 +25,6 @@ Use a dedicated Gmail App Password with two-step verification enabled. Keep cred
 
 The [workflow](.github/workflows/main.yml) runs at 00:00 UTC on the first day of each month. Edit its cron expression to change the schedule. Scheduled runs may be delayed.
 
-Runs are serialized and limited to 15 minutes; SMTP has a 30-second timeout. A send error fails the run. The workflow writes a timestamped record to `keepalive.log` on the `logs` branch, which requires `contents: write` permission. This record is not a delivery receipt.
 
 ## Local use and development
 
@@ -50,6 +49,8 @@ If SMTP authentication fails, check the account and App Password. If SMTP accept
 ## License
 
 [MIT](LICENSE).
+
+Run output is no longer committed to the public `logs` branch. Successful runs add only the last success time to the Actions summary. Existing branch history is unchanged.
 
 ## Weekly secret scan
 
