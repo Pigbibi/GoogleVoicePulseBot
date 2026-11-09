@@ -18,22 +18,25 @@ Current required union of classic protection and active rulesets (preserved):
 
 - `Gitleaks`
 - `Repository hygiene`
-- `Secret scan / Gitleaks`
 - `pr-template`
 - `risk-gate`
 - `test`
 
+The duplicate pull-request scanner `required-gitleaks.yml` is removed: `Gitleaks`
+in `engineering-governance.yml` scans pull request ranges, and
+`weekly-gitleaks.yml` keeps the scheduled full-history scan. `Secret scan /
+Gitleaks` is no longer produced on pull requests and is not a required context.
+
 Preserve the union of classic protection and active default-branch rulesets,
 including strictness, app bindings, review, conversation, administrator, push,
 deletion and bypass controls. Job exports are evidence outside the repository.
-No native setting, required-check list or workflow changes in this PR.
+No native setting or required-check list changes in this PR.
 
 A future enforcement migration requires separate authorization and verification.
 Only after substantive PR-template evidence and authenticated approval verification
 are incorporated into authoritative risk-gate enforcement may pr-template become
 advisory. It remains required wherever currently enforced. CodeRabbit is
 supplementary; any currently enforced provider dependency remains authoritative.
-Preserve duplicate scanners until equivalent coverage is separately demonstrated.
 Re-read context names, app bindings and settings before any future migration.
 
 ## Risk tiers and acceptance
